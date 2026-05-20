@@ -1,0 +1,6 @@
+.env.local
+.next/
+node_modules/
+db.json
+public/thumbnails/
+tsconfig.tsbuildinfo
