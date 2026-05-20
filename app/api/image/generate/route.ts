@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { callClaude, parseJson } from "@/lib/claude";
 import { generateImage } from "@/lib/openai";
 import { generateImageFree } from "@/lib/pollinations";
+import { generateImageGemini } from "@/lib/gemini";
 
 export const maxDuration = 60;
 
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     const { title, keyword, provider = "openai" } = (await req.json()) as {
       title: string;
       keyword: string;
-      provider?: "openai" | "free";
+      provider?: "openai" | "gemini" | "free";
     };
 
     const text = await callClaude(
@@ -59,6 +60,17 @@ export async function POST(req: NextRequest) {
     if (provider === "free") {
       const imageUrl = generateImageFree(finalPrompt);
       return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "free" });
+    }
+
+    if (provider === "gemini") {
+      try {
+        const imageUrl = await generateImageGemini(finalPrompt);
+        return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "gemini" });
+      } catch (geminiErr) {
+        console.warn("[image/generate] Gemini 실패, Pollinations로 전환:", geminiErr);
+        const imageUrl = generateImageFree(finalPrompt);
+        return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "free" });
+      }
     }
 
     // OpenAI 시도, 실패 시 Pollinations로 자동 fallback

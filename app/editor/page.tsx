@@ -63,7 +63,7 @@ export default function EditorPage() {
     }
   };
 
-  const handleRegenerateThumbnail = async (provider: "openai" | "free" = "openai") => {
+  const handleRegenerateThumbnail = async (provider: "openai" | "gemini" | "free" = "openai") => {
     if (!state) return;
     setRegeneratingThumbnail(true);
     try {

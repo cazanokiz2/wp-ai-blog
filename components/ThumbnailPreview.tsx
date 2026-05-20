@@ -2,7 +2,7 @@
 
 interface ThumbnailPreviewProps {
   url: string;
-  onRegenerate: (provider: "openai" | "free") => void;
+  onRegenerate: (provider: "openai" | "gemini" | "free") => void;
   loading?: boolean;
 }
 
@@ -22,7 +22,7 @@ export default function ThumbnailPreview({ url, onRegenerate, loading }: Thumbna
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <button
           onClick={() => onRegenerate("openai")}
           disabled={loading}
@@ -31,7 +31,17 @@ export default function ThumbnailPreview({ url, onRegenerate, loading }: Thumbna
           {loading && (
             <span className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
           )}
-          OpenAI 생성
+          OpenAI
+        </button>
+        <button
+          onClick={() => onRegenerate("gemini")}
+          disabled={loading}
+          className="py-2 text-sm text-blue-600 border border-blue-300 rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+        >
+          {loading && (
+            <span className="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          )}
+          Gemini
         </button>
         <button
           onClick={() => onRegenerate("free")}
@@ -41,12 +51,12 @@ export default function ThumbnailPreview({ url, onRegenerate, loading }: Thumbna
           {loading && (
             <span className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
           )}
-          무료 생성
+          무료
         </button>
       </div>
 
       <p className="text-xs text-gray-400 text-center">
-        OpenAI 실패 시 무료 생성으로 자동 전환됩니다
+        OpenAI · Gemini 실패 시 무료 생성으로 자동 전환됩니다
       </p>
     </div>
   );
