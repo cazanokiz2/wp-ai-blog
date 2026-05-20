@@ -54,9 +54,8 @@ export async function POST(req: NextRequest) {
     const { prompt } = parseJson<{ prompt: string }>(text);
 
     const finalPrompt = `${prompt}, professional blog thumbnail, clean design, no text, no watermark, landscape 3:2 ratio`;
-    const b64 = await generateImage(finalPrompt);
+    const imageUrl = await generateImage(finalPrompt);
 
-    const imageUrl = `data:image/png;base64,${b64}`;
     return NextResponse.json({ imageUrl, prompt: finalPrompt });
   } catch (e) {
     console.error("[image/generate]", e);
