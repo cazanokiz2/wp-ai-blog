@@ -39,9 +39,12 @@ export async function GET() {
       },
     );
     if (res.ok) {
-      const data = await res.json() as { predictions?: Array<{ bytesBase64Encoded?: string }> };
+      const data = await res.json() as Record<string, unknown>;
       diag.gemini_status = "ok";
-      diag.gemini_b64_length = data.predictions?.[0]?.bytesBase64Encoded?.length ?? 0;
+      diag.gemini_raw_keys = Object.keys(data);
+      const preds = data.predictions as Array<Record<string, unknown>> | undefined;
+      diag.gemini_pred_keys = preds?.[0] ? Object.keys(preds[0]) : [];
+      diag.gemini_pred_sample = JSON.stringify(preds?.[0]).slice(0, 200);
     } else {
       const err = await res.text();
       diag.gemini_status = `http_${res.status}`;
