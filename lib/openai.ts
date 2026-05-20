@@ -4,10 +4,11 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function generateImage(prompt: string): Promise<string> {
   const res = await client.images.generate({
-    model: "gpt-image-1",
+    model: "dall-e-3",
     prompt,
-    size: "1536x1024",
-    quality: "high",
+    size: "1792x1024",
+    quality: "standard",
+    response_format: "b64_json",
     n: 1,
   });
   const b64 = res.data?.[0]?.b64_json;
