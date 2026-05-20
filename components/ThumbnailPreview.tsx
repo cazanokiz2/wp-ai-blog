@@ -2,13 +2,13 @@
 
 interface ThumbnailPreviewProps {
   url: string;
-  onRegenerate: () => void;
+  onRegenerate: (provider: "openai" | "free") => void;
   loading?: boolean;
 }
 
 export default function ThumbnailPreview({ url, onRegenerate, loading }: ThumbnailPreviewProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {url ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
@@ -21,14 +21,33 @@ export default function ThumbnailPreview({ url, onRegenerate, loading }: Thumbna
           <span className="text-gray-400 text-sm">썸네일 없음</span>
         </div>
       )}
-      <button
-        onClick={onRegenerate}
-        disabled={loading}
-        className="w-full py-2 text-sm text-indigo-600 border border-indigo-300 rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        {loading && <span className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />}
-        {loading ? "생성 중..." : "썸네일 재생성"}
-      </button>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => onRegenerate("openai")}
+          disabled={loading}
+          className="py-2 text-sm text-indigo-600 border border-indigo-300 rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+        >
+          {loading && (
+            <span className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+          )}
+          OpenAI 생성
+        </button>
+        <button
+          onClick={() => onRegenerate("free")}
+          disabled={loading}
+          className="py-2 text-sm text-emerald-600 border border-emerald-300 rounded-xl hover:bg-emerald-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+        >
+          {loading && (
+            <span className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+          )}
+          무료 생성
+        </button>
+      </div>
+
+      <p className="text-xs text-gray-400 text-center">
+        OpenAI 실패 시 무료 생성으로 자동 전환됩니다
+      </p>
     </div>
   );
 }

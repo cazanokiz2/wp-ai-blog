@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callClaude, parseJson } from "@/lib/claude";
 import { generateImage } from "@/lib/openai";
+import { generateImageFree } from "@/lib/pollinations";
 
 export const maxDuration = 60;
 
 const PROMPT_SYSTEM = `당신은 블로그 썸네일 이미지 프롬프트 전문가입니다.
-gpt-image-1 모델로 생성할 블로그 썸네일 이미지 프롬프트를 영어로 작성하세요.
+블로그 썸네일 이미지 프롬프트를 영어로 작성하세요.
 프롬프트 원칙:
 - 블로그 주제를 시각적으로 잘 표현
 - 전문적이고 깔끔한 스타일
@@ -41,9 +42,10 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, keyword } = (await req.json()) as {
+    const { title, keyword, provider = "openai" } = (await req.json()) as {
       title: string;
       keyword: string;
+      provider?: "openai" | "free";
     };
 
     const text = await callClaude(
@@ -52,11 +54,22 @@ export async function POST(req: NextRequest) {
       512,
     );
     const { prompt } = parseJson<{ prompt: string }>(text);
-
     const finalPrompt = `${prompt}, professional blog thumbnail, clean design, no text, no watermark, landscape 3:2 ratio`;
-    const imageUrl = await generateImage(finalPrompt);
 
-    return NextResponse.json({ imageUrl, prompt: finalPrompt });
+    if (provider === "free") {
+      const imageUrl = generateImageFree(finalPrompt);
+      return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "free" });
+    }
+
+    // OpenAI 시도, 실패 시 Pollinations로 자동 fallback
+    try {
+      const imageUrl = await generateImage(finalPrompt);
+      return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "openai" });
+    } catch (openaiErr) {
+      console.warn("[image/generate] OpenAI 실패, Pollinations로 전환:", openaiErr);
+      const imageUrl = generateImageFree(finalPrompt);
+      return NextResponse.json({ imageUrl, prompt: finalPrompt, provider: "free" });
+    }
   } catch (e) {
     console.error("[image/generate]", e);
     return NextResponse.json(

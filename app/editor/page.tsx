@@ -63,14 +63,14 @@ export default function EditorPage() {
     }
   };
 
-  const handleRegenerateThumbnail = async () => {
+  const handleRegenerateThumbnail = async (provider: "openai" | "free" = "openai") => {
     if (!state) return;
     setRegeneratingThumbnail(true);
     try {
       const res = await fetch("/api/image/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword: state.keyword, title: state.selectedTitle }),
+        body: JSON.stringify({ keyword: state.keyword, title: state.selectedTitle, provider }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json() as { imageUrl: string };
