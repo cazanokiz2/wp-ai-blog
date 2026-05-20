@@ -1,5 +1,3 @@
-import { readFileSync } from "fs";
-import path from "path";
 
 export interface WpPublishOptions {
   title: string;
@@ -124,10 +122,11 @@ export async function publishToWordPress(
   if (options.imageUrl) {
     try {
       let mediaBody: ArrayBuffer;
-      if (options.imageUrl.startsWith("/")) {
-        // 로컬 파일 (public/thumbnails/xxx.png)
-        const data = readFileSync(path.join(process.cwd(), "public", options.imageUrl));
-        mediaBody = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+      if (options.imageUrl.startsWith("data:image/")) {
+        // base64 data URL
+        const base64 = options.imageUrl.split(",")[1];
+        const bytes = Buffer.from(base64, "base64");
+        mediaBody = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
       } else {
         // 외부 URL
         const imgRes = await fetch(options.imageUrl);

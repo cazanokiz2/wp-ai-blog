@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFileSync, mkdirSync } from "fs";
-import path from "path";
 import { callClaude, parseJson } from "@/lib/claude";
 import { generateImage } from "@/lib/openai";
+
+export const maxDuration = 60;
 
 const PROMPT_SYSTEM = `당신은 블로그 썸네일 이미지 프롬프트 전문가입니다.
 gpt-image-1 모델로 생성할 블로그 썸네일 이미지 프롬프트를 영어로 작성하세요.
@@ -18,7 +18,10 @@ gpt-image-1 모델로 생성할 블로그 썸네일 이미지 프롬프트를 �
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, keyword } = await req.json() as { title: string; keyword: string };
+    const { title, keyword } = (await req.json()) as {
+      title: string;
+      keyword: string;
+    };
 
     const text = await callClaude(
       PROMPT_SYSTEM,
@@ -30,13 +33,7 @@ export async function POST(req: NextRequest) {
     const finalPrompt = `${prompt}, professional blog thumbnail, clean design, no text, no watermark, landscape 3:2 ratio`;
     const b64 = await generateImage(finalPrompt);
 
-    // base64 → PNG 파일로 저장 (public/thumbnails/)
-    const id = Date.now();
-    const dir = path.join(process.cwd(), "public", "thumbnails");
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(path.join(dir, `${id}.png`), Buffer.from(b64, "base64"));
-
-    const imageUrl = `/thumbnails/${id}.png`;
+    const imageUrl = `data:image/png;base64,${b64}`;
     return NextResponse.json({ imageUrl, prompt: finalPrompt });
   } catch (e) {
     console.error("[image/generate]", e);
