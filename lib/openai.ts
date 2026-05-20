@@ -4,13 +4,13 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function generateImage(prompt: string): Promise<string> {
   const res = await client.images.generate({
-    model: "dall-e-3",
+    model: "gpt-image-1",
     prompt,
-    size: "1792x1024",
-    quality: "standard",
+    size: "1536x1024",
+    quality: "medium",
     n: 1,
   });
-  const url = res.data?.[0]?.url;
-  if (!url) throw new Error("이미지 URL을 받지 못했습니다");
-  return url;
+  const b64 = res.data?.[0]?.b64_json;
+  if (!b64) throw new Error("이미지 데이터를 받지 못했습니다");
+  return `data:image/png;base64,${b64}`;
 }
